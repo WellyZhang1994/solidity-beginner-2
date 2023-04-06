@@ -22,11 +22,10 @@ contract PokemonGo {
 
     mapping(address => Pokemon[]) pokemonOwner;
 
-    function createPokemon(string calldata _name, uint _attack, uint _defense)  external returns(bool) {
+    function createPokemon(string calldata _name, uint _attack, uint _defense)  external {
         Pokemon memory tempPoke = Pokemon({name: _name, attack: _attack, defense: _defense});
         Pokemon[] storage addressOfPokemon = pokemonOwner[msg.sender];
         addressOfPokemon.push(tempPoke);
-        return true;
     }
 
     function getPokemonByAddress() view external returns(Pokemon[] memory) {
@@ -38,24 +37,25 @@ contract PokemonGo {
         return pokemonOwner[msg.sender][pokemonLength];
     }
 
-    function increaseAttack(string calldata _pokemonName) payable external returns(Pokemon memory) {
+    function increaseAttack(string calldata _pokemonName) payable external{
         require(msg.value > 0.1 ether);
         uint returnEther = msg.value - 0.1 ether;
-        msg.sender.call{value:returnEther}("");
+        (bool success, ) = msg.sender.call{value:returnEther}("");
+        require(success, "Address: unable to send value, recipient may have reverted");
+
         Pokemon[] storage pokemons = pokemonOwner[msg.sender];
         Pokemon storage targetPoke = pokemons.find(_pokemonName);
         targetPoke.attack ++;
-        return targetPoke;
     }
 
-    function increaseDefense(string calldata _pokemonName) payable external returns(Pokemon memory) {
+    function increaseDefense(string calldata _pokemonName) payable external{
         require(msg.value > 0.1 ether);
         uint returnEther = msg.value - 0.1 ether;
-        msg.sender.call{value:returnEther}("");
+        (bool success, ) = msg.sender.call{value:returnEther}("");
+        require(success, "Address: unable to send value, recipient may have reverted");
         Pokemon[] storage pokemons = pokemonOwner[msg.sender];
         Pokemon storage targetPoke = pokemons.find(_pokemonName);
         targetPoke.defense ++;
-        return targetPoke;
     }
 }
 
